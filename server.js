@@ -1,15 +1,28 @@
 import express from "express";
-import axios from "axios";
-import os from "os";
 import cors from "cors";
-import si from "systeminformation";
+import cookieParser from 'cookie-parser';
+import { cpuInfo, diskInfo, findLevelInfo, getCoinsManyInfo, getCoinsOneInfo, getLevelOneInfo, getServerInfoByIP, loginToAcount, memInfo, registerNewAccount, startCSServer, stopServer, systemUptime, updateCoinsInfo, updateLevelInfo } from "./routesFunctions.js";
+import 'dotenv/config'
+import {validateUser, validationLogin, validationRegister } from "./middleWare.js";
+import { homePage } from "./home.js";
+import { allowedOrigins } from "./constant.js";
 
 
 const app = express();
-app.use(cors())
-app.use(express.json());
 
-const PORT = 8081
+const corsOptions = {
+    origin: allowedOrigins,
+    optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+    
+};
+
+app.use(cors(corsOptions));
+
+// app.use(cors())
+app.use(express.json());
+app.use(cookieParser());
+
+const PORT = process.env.PORT || 8081
 
 app.listen(PORT,()=>{
     console.log(`Listening on PORT ${PORT}`)
@@ -22,7 +35,7 @@ app.listen(PORT,()=>{
 // console.log(os.hostname())
 // console.log(os.loadavg())
 // console.log(os.machine())
-// // console.log(os.networkInterfaces())
+// console.log(os.networkInterfaces())
 // console.log(os.tmpdir())
 // console.log(os.totalmem())
 // console.log(os.type()) // system type
@@ -31,68 +44,30 @@ app.listen(PORT,()=>{
 // console.log(os.version()) //os Version 
 
 
-app.get("/cpu-info", async(req, res)=>{
-    try {
-        const cpuInfo = await si.cpu();
-        const cpuLoad = await si.currentLoad();
-        const systemStats = {
-            cpuInfo: cpuInfo,
-            cpuUsage: cpuLoad,
-        };
-        // console.log(systemStats);
-        res.json(systemStats)
-    } catch (error) {
-        res.status(500).json({error:error})
-    }
-})
+app.get("/cpu-info", cpuInfo)
 
-app.get("/memory-info", async(req, res)=>{
-    try {
-        const memInfo = await si.mem();
-        // console.log(systemStats);
-        const systemInfo={
-            percentage: Math.round(memInfo?.used/memInfo?.total*100),
-            usedMB: Math.round(memInfo?.used/1024/1024),
-            usedGB: Math.round(memInfo?.used/1e9),
-            totalMB: Math.round(memInfo?.total/1024/1024),
-            totalGB: Math.round(memInfo?.total/1e9),
-            memory: memInfo,
-        }
-        // <p>Memory Used: {Math.round(data.memory.used/1024/1024)}MB of {Math.round(data.memory.total/1e9)}GB</p>
+app.get("/memory-info", memInfo)
+app.get("/disk-info", diskInfo)
 
-        res.json(systemInfo)
-        
-    } catch (error) {
-        res.status(500).json({error:error})
-    }
-})
-app.get("/disk-info", async(req, res)=>{
-    try {
-        const diskInfo = await si.fsSize();
-        // console.log(systemStats);
-        res.json(diskInfo)
-    } catch (error) {
-        res.status(500).json({error:error})
-    }
-})
+app.get("/system-uptime", systemUptime)
 
-app.get("/system-uptime", (req, res)=>{
-    try {
-        const upTime = os.uptime();
-        // console.log(systemStats);
-        const day = Math.round(upTime/86400);
-        const hour = Math.round(upTime/60/60)%60;
-        const minutes = Math.round(upTime/60)%60;
-        const seconds = Math.round(upTime%60);
-        const systemInfo={
-            day,
-            hour,
-            minutes,
-            seconds,
-            upTime,
-        }
-        res.json(systemInfo)
-    } catch (error) {
-        res.status(500).json({error:error})
-    }
+
+app.post("/login", validationLogin, loginToAcount)
+app.post("/register", validationRegister, registerNewAccount)
+
+app.get("/get-level-info", validateUser, getLevelOneInfo)
+app.get("/find-levels", validateUser, findLevelInfo)
+app.post("/update-levels", validateUser, updateLevelInfo)
+
+app.post("/update-coins", validateUser, updateCoinsInfo)
+app.get("/get-coins-info", validateUser, getCoinsOneInfo)
+app.get("/get-coins-many-info", validateUser, getCoinsManyInfo)
+
+app.get("/get-server-ip-info", getServerInfoByIP)
+app.get("/start-cs-server", startCSServer)
+app.get("/stop-cs-server", stopServer)
+
+
+app.get("/", (req,res)=>{
+    res.send(homePage)
 })
