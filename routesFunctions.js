@@ -397,7 +397,7 @@ export const getServerInfoByIP = async(req, res)=>{
 }
 export const startCSServer = (req, res)=>{
     try {
-        startCSServerCMD("/home/ogp_agent/OGP_User_Files/tes/2", "ogp_game_startup.pid", "185.34.52.106","27018","de_dust2",32)
+        startCSServerCMD("/home/ogp_agent/OGP_User_Files/tes/2", "ogp_game_startup.pid", "185.34.52.106","27018","bb_megabuild4",32)
         return res.json({message:"server Started"})
     } catch (error) {
         return res.json({message: error.message})
