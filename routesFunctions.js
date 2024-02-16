@@ -397,7 +397,7 @@ export const getServerInfoByIP = async(req, res)=>{
 }
 export const startCSServer = (req, res)=>{
     try {
-        startCSServerCMD(undefined, undefined, "192.168.1.103","27015","de_dust2",32)
+        startCSServerCMD("/home/ogp_agent/OGP_User_Files/tes/2", "ogp_game_startup.pid", "185.34.52.106","27018","de_dust2",32)
         return res.json({message:"server Started"})
     } catch (error) {
         return res.json({message: error.message})
@@ -414,7 +414,7 @@ export const startCSServerCMD = (path, pid_file="", ip, port, map, max_players, 
     const serverCommandLinux = `./hlds_run -game cstrike -pidfile ${pid_file} +map ${map} +ip ${ip} +port ${port} +maxplayers ${max_players} ${addtionalParams}`;
     const serverCommand = `hlds.exe -console -pidfile ${pid} -game cstrike +map ${map} +ip ${ip} +port ${port} +maxplayers ${max_players} ${addtionalParams}`;
     const serverManual = `hlds.exe -console -pidfile pidfile.txt -game cstrike +map de_dust2 +ip 192.168.1.103 +port 27015 +maxplayers 32`;
-    exec(`screen -S ${session_name} -d -m ${serverCommand}`, { cwd: cs16Directory },(error, stdout, stderr) => {
+    exec(`screen -S ${session_name} -d -m ${serverCommandLinux}`, { cwd: path },(error, stdout, stderr) => {
         if (error) {
             console.error(`Error starting HLDS: ${error.message}`);
             console.error(`stderr: ${stderr}`);
